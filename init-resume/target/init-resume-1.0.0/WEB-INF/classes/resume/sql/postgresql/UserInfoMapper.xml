@@ -1,0 +1,252 @@
+
+<?xml-model href="file.dtd" type="application/xml-dtd"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.init.resume.main.mapper.UserInfoMapper">
+
+    <resultMap id="UserInfoResult"  type="UserInfo">
+
+        <result property="userid"    	column="userId"/>
+        <result property="userpw"    	column="userPw"/>
+        <result property="name"         column="name"/>
+        <result property="phone"        column="phone"/>
+        <result property="email"        column="email"/>
+        <result property="birth"        column="birth"/>
+        <result property="id"           column="id"/>
+        <result property="month"        column="month"/>
+        <result property="area"         column="area"/>
+        <result property="reg_date"     column="reg_date"/>
+        <result property="rnum"         column="rnum"/>
+        <result property="totcnt"       column="totcnt"/>
+        <result property="career_year"  column="career_year"/>
+        <result property="work_year"  column="work_year"/>
+        
+    </resultMap>
+    
+    <select id="getAllUser"  parameterType="hashMap"   resultType="UserInfo">
+    <![CDATA[
+    select *
+    from (
+  		  select * ,(ROW_NUMBER() OVER()) AS RNUM, COUNT(*) OVER() AS totcnt
+        from (
+          select p.del_yn 
+                 ,p.id
+                 ,p.name 
+                 ,p.phone 
+                 ,p.email
+                 ,p.area
+                 ,(
+																		SELECT CONCAT(CONCAT((COUNT(*)+29)/30/12,'년'),CONCAT(((COUNT(*)+29)/30)%12,'개월')) CAREER_YEAR
+																		  FROM 
+																		      (SELECT DATE
+																		         FROM
+																		             (SELECT DATE
+																		                FROM ( (WITH DATE_SERIES AS
+																							   (SELECT DATE(GENERATE_SERIES(TO_DATE('1950-01-01', 'YYYY-MM-DD')
+																						              , TO_DATE('2030-12-31', 'YYYY-MM-DD'),'1 day')) AS DATE
+																						       )
+																		                     SELECT DATE
+																		                       FROM DATE_SERIES ) ) G) a
+																	             JOIN (SELECT START_DATE
+																				            , END_DATE
+																	                     FROM RESUME.RESUME_CAREER_DETAIL R WHERE R.INFO_ID=P.ID
+																	    				   UNION SELECT START_DATE
+																	                        , END_DATE FROM RESUME.RESUME_CAREER_DETAIL R WHERE R.INFO_ID=P.ID
+																				  )
+																			  RESUME_CAREER_DETAIL
+																		   ON DATE >= START_DATE
+																	      AND DATE <= END_DATE
+															              GROUP BY DATE) result)
+																 ,(
+																   SELECT CONCAT(CONCAT((COUNT(*)+29)/30/12,'년'),CONCAT(((COUNT(*)+29)/30)%12,'개월')) WORK_YEAR
+																					FROM 
+																			      (SELECT DATE
+																			         FROM
+																			             (SELECT DATE
+																			                FROM ( ( WITH DATE_SERIES AS
+																								   ( SELECT DATE(GENERATE_SERIES(TO_DATE('1950-01-01', 'YYYY-MM-DD')
+																							              , TO_DATE('2030-12-31', 'YYYY-MM-DD'),'1 day')) AS DATE
+																							       )
+																			                     SELECT DATE
+																			                       FROM DATE_SERIES ) ) G) a
+																			              JOIN (SELECT START_DATE
+																						             , END_DATE
+																			                      FROM RESUME.RESUME_WORK_EXPERTENTCE
+																			                     WHERE INFO_ID=P.ID
+																			    					   UNION SELECT START_DATE
+																			                         , END_DATE FROM RESUME.RESUME_WORK_EXPERTENTCE WHERE INFO_ID=P.ID
+																							  )
+																							  RESUME_WORK_EXPERTENTCE
+																						   ON DATE >= START_DATE
+																					      AND DATE <= END_DATE
+																			              GROUP BY DATE) RESULT)       
+                 ,p.birth
+                 ,concat(ro.name, '/', rt.name) as occupation
+                 ,ARRAY_TO_STRING(ARRAY_AGG(distinct qc.qualifi_name),',') as qualifi
+                 ,i.imgname
+                 ,concat((greatest(max(c.end_date) ,max(w.end_date)) - least(min(c.start_date) , min(w.start_date)))/365, '년',
+                 (greatest(max(c.end_date) ,max(w.end_date)) - least(min(c.start_date) , min(w.start_date)))%365/30 ,'개월') as career_age
+                 ,extract(year from age(now()::date, p.birth)) as age
+                 ,(greatest(max(c.end_date) ,max(w.end_date)) - least(min(c.start_date) , min(w.start_date)))/365 as cyear
+            from  resume.resume_personal_info p 
+                  left join resume.resume_qualifications q on p.id = q.info_id 
+                  left join resume.resume_qualification_code qc on q.qualifi_nm = qc.qualifi_nm
+                  left join resume.resume_occupation ro on p.occupation = ro.occupation_nm
+                  left join resume.resume_task rt on p.task = rt.task_nm 
+                  left join resume.resume_career_detail c  on p.id = c.info_id 
+                  left join resume.resume_work_expertentce w  on p.id = w.info_id 
+                  left join resume.resume_img i on p.id = i.info_id 
+           where 1=1
+           group by p.del_yn
+           			,p.id
+           			,p.name
+           			,p.phone 
+                 	,p.email
+                 	,p.birth
+                    ,i.imgname
+                    ,ro.name
+                    ,rt.name
+            )a
+    ]]>
+    <where>
+      del_yn = 'N' 
+      <if test='search_yn == "Y"'>
+      and id in (
+          select p.id
+          from resume.resume_personal_info p, resume.resume_work_expertentce w , resume.resume_career_detail c,resume.resume_qualifications q  
+          <where>
+            <if test='name != ""'>
+              <![CDATA[
+                and p.name like concat('%',#{name},'%') 
+              ]]>
+            </if>
+            <if test='career != ""'>
+              <![CDATA[
+              and ${career} <= cast(replace(substr(career_year,0,2),'년','') as integer)
+              ]]>
+            </if>
+            <if test='career_end != ""'>
+              <![CDATA[
+              and cast(replace(substr(career_year,0,2),'년','') as integer) <= ${career_end}
+              ]]>
+            </if>
+            <if test='area != ""'>
+             <![CDATA[
+              and p.area like concat('%', #{area}, '%')
+              ]]>
+            </if>
+            <if test='qualifi_nm != ""'>
+              and p.id = q.info_id and (q.qualifi_nm in (${qualifi_nm}))
+            </if>
+            <if test='client_nm != ""'>
+              and p.id = c.info_id and (c.client_nm in (${client_nm}))
+            </if>
+            <if test='occupation != ""'>
+              and p.id = w.info_id  and p.id = c.info_id  and p.occupation = ${occupation}
+            </if>
+            <if test='task != ""'>
+              and p.id = w.info_id  and p.id = c.info_id  and p.task = ${task}
+            </if>
+          </where>
+          )
+      </if>
+    </where>
+    <![CDATA[
+    )a
+    where RNUM BETWEEN #{start} AND #{limit} ORDER BY id asc
+    ]]>
+    </select>
+
+      <select id="selectInfoID" parameterType="hashMap"   resultType="UserInfo">
+        <![CDATA[
+          SELECT max(id) as id
+            FROM resume.resume_personal_info
+        ]]>
+      </select>
+
+
+      <insert id="fileInsert" parameterType="FileAttach">
+        <![CDATA[
+        INSERT INTO resume.resume_file
+        (info_id, filename, fileoriginname,fileurl)
+        VALUES(
+          ${info_id},
+          #{filename},
+          #{fileoriginname},
+          #{fileurl}
+          )
+        ]]>
+      </insert>
+      
+      <insert id="imgInsert" parameterType="Image">
+        <![CDATA[
+        INSERT INTO resume.resume_img
+        (info_id, imgname, imgoriginname, imgurl)
+        VALUES(
+          ${info_id},
+          #{imgname},
+          #{imgoriginname},
+          #{imgurl}
+          )
+        ]]>
+      </insert>
+
+      <delete id="fileDelete" parameterType="FileAttach">
+        <![CDATA[
+          DELETE 
+            FROM resume.resume_file 
+           where id = ${id}
+        ]]>
+      </delete>
+
+
+      <delete id="imgDelete" parameterType="Image">
+        <![CDATA[
+          DELETE 
+            FROM resume.resume_img 
+           WHERE info_id = '${info_id}'
+        ]]>
+      </delete>
+
+
+    <insert id="saveUser" parameterType="hashMap">
+      <![CDATA[
+      INSERT INTO resume.resume_personal_info
+      (name ,phone ,email ,birth ,address, del_yn, area)
+      VALUES(
+        #{name}  
+        ,#{phone}
+        ,#{email}
+        ,TO_DATE(#{birth},  'YYYY-MM-DD')
+        ,#{address}
+        ,'N'
+        ,#{area}
+        );
+      ]]>
+    </insert>
+
+    <update id="deleteUser" parameterType="hashMap">
+      <![CDATA[
+      UPDATE resume.resume_personal_info 
+      SET del_yn      = 'Y'
+      WHERE id = '${id}'
+      ]]>
+    </update>
+
+    <update id="updateUser" parameterType="hashMap">
+      <![CDATA[
+        UPDATE resume.resume_personal_info 
+        SET name        = #{name}
+            ,phone      = #{phone}   
+            ,email      = #{email}
+            ,birth      = TO_DATE(#{birth},  'YYYY-MM-DD')
+            ,address    = #{address}
+            ,detailaddress    = #{detailaddress}
+            ,occupation = ${occupation}
+            ,task       = COALESCE(${task},0)
+            ,area		= COALESCE(#{area},'')
+        WHERE id = '${info_id}'
+      ]]>
+    </update>
+</mapper>

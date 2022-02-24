@@ -1,0 +1,45 @@
+
+<?xml-model href="file.dtd" type="application/xml-dtd"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.init.resume.main.mapper.InstituteMapper">
+    
+    <select id="getAllInstitute"  parameterType="hashMap"   resultType="Institute">
+    <![CDATA[
+        SELECT * 
+        FROM ( 
+          SELECT A.*, (ROW_NUMBER() OVER()) AS RNUM, COUNT(*) OVER() AS totcnt 
+          FROM(
+            select *
+            from resume.resume_institute 
+              )A)A
+        WHERE RNUM BETWEEN #{start} AND #{limit} ORDER BY institute_nm ASC
+    ]]>
+    </select>
+
+    <insert id="saveInstitute" parameterType="hashMap">
+    <![CDATA[
+        INSERT INTO resume.resume_Institute
+        (name)
+        VALUES(#{name});
+    ]]>
+    </insert>
+
+    <delete id="deleteInstitute" parameterType="hashMap">
+      <![CDATA[
+        DELETE 
+        FROM resume.resume_institute 
+        where institute_nm = ${institute_nm}
+      ]]>
+    </delete>
+
+    <update id="updateInstitute" parameterType="hashMap">
+      <![CDATA[
+        UPDATE resume.resume_institute 
+        SET 
+          name = #{name} 
+        WHERE institute_nm = ${institute_nm}
+      ]]>
+    </update>
+</mapper>

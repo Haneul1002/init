@@ -1,0 +1,63 @@
+
+<?xml-model href="file.dtd" type="application/xml-dtd"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.init.resume.main.mapper.TaskMapper">
+
+    <resultMap id="TaskResult"  type="Task">
+
+        <result property="task_nm"      column="task_nm"/>
+        <result property="name"         column="name"/>
+        <result property="occupation"   column="occupation"/>
+        <result property="rnum"         column="rnum"/>
+        <result property="totcnt"       column="totcnt"/>
+    </resultMap>
+    
+    <select id="getAllTask"  parameterType="hashMap"   resultType="Task"  >
+    <![CDATA[
+        SELECT * 
+        FROM ( 
+          SELECT A.*, (ROW_NUMBER() OVER()) AS RNUM, COUNT(*) OVER() AS totcnt 
+          FROM ( 
+            select * 
+            from resume.resume_task 
+                )A)A
+        WHERE RNUM BETWEEN #{start} AND #{limit} ORDER BY task_nm ASC
+    ]]>
+    </select>
+
+    <select id="Taskoccupation" parameterType="Map" resultType="Task">
+      <![CDATA[
+        select *
+          from resume.resume_task t
+         where t.occupation = ${occupation}
+      ]]>
+    </select>
+
+    <insert id="saveTask" parameterType="hashMap">
+    <![CDATA[
+        INSERT INTO resume.resume_task
+        (name,occupation)
+        VALUES(#{name},${occupation});
+    ]]>
+    </insert>
+
+    <delete id="deleteTask" parameterType="hashMap">
+      <![CDATA[
+        DELETE 
+        FROM resume.resume_task 
+        where task_nm = ${task_nm}
+      ]]>
+    </delete>
+
+    <update id="updateTask" parameterType="hashMap">
+      <![CDATA[
+        UPDATE resume.resume_task 
+        SET name = #{name},
+        occupation = ${occupation}
+        WHERE task_nm = ${task_nm}
+      ]]>
+    </update>
+
+</mapper>

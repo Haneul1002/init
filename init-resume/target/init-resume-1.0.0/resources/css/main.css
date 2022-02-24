@@ -1,0 +1,65 @@
+body{
+    -ms-overflow-style: none; /* IE and Edge */
+    scrollbar-width: none; /* Firefox */
+}
+
+body::-webkit-scrollbar {
+    display: none; /* Chrome, Safari, Opera*/
+}
+
+.modal-body{
+    padding: 0;
+}
+
+#detail-add-btn{
+    display: none;
+}
+
+.searchTable{
+    width: 15%;
+    margin-top: 20px;
+    font-size: 15px;
+    text-align: left;
+    /* display: none; */
+    float:left;
+}
+
+.searchTable .searchTitle{
+    text-align: left;
+    font-weight:bold;
+}
+
+.searchTable .searchButtonSet{
+    text-align: center;
+}
+
+.searchTable td{
+    padding: 5px;
+}
+
+.form-control{
+    width: 100%;
+}
+
+.form-select{
+    width: 100%;
+}
+
+.input-label{
+    display: inline-block;
+    width: 100%;
+}
+
+
+#userSearchList{
+    display: none;
+}
+
+#userSearchListpager{
+    display: none;
+}
+
+.info-img{
+    width: 40px;
+    height: 60px;
+}

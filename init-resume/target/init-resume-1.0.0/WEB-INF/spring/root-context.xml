@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:mybatis="http://mybatis.org/schema/mybatis-spring"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans https://www.springframework.org/schema/beans/spring-beans.xsd
+						http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.0.xsd
+						http://mybatis.org/schema/mybatis-spring http://mybatis.org/schema/mybatis-spring.xsd">
+	
+	<!-- Root Context: defines shared resources visible to all other web components -->
+	<!-- properties -->
+    <bean class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+        <property name="locations" value="classpath:/jdbc.properties" />
+        <property name="fileEncoding" value="UTF-8" />
+    </bean>
+    <!-- JDBC-PostgreSQL -->
+    <bean id="dataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource">
+        <property name="driverClassName" value="org.postgresql.Driver" />
+        <property name="url" value="jdbc:postgresql://112.217.204.26:5432/inbapsdb" />
+        <property name="username" value="inbaps" />
+        <property name="password" value="inbaps" />
+        <!-- <property name="url" value="jdbc:postgresql://112.217.204.26:5432/inbapsdb" /> -->
+        <!-- <property name="username" value="inbaps" />
+        <property name="password" value="inbaps" /> -->
+    </bean>
+    <!-- MyBatis-Spring -->
+    <bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+        <property name="configLocation" value="classpath:mybatis-config.xml" />
+        <property name="dataSource" ref="dataSource" />
+    </bean>
+    
+    
+    <context:component-scan base-package="com.init.resume.main">
+        <context:include-filter type="annotation" expression="org.springframework.stereotype.Controller"/>
+        <context:exclude-filter type="annotation" expression="org.springframework.stereotype.Service"/>
+        <context:exclude-filter type="annotation" expression="org.springframework.stereotype.Repository"/>
+    </context:component-scan>
+    
+    <bean id="AreaService"	 					class="com.init.resume.main.service.AreaService"/>
+    <bean id="CareerService" 					class="com.init.resume.main.service.CareerService"/>
+    <bean id="ClientService" 					class="com.init.resume.main.service.ClientService"/>
+    <bean id="DetailService" 					class="com.init.resume.main.service.DetailService"/>
+    <bean id="EducationService" 				class="com.init.resume.main.service.EducationService"/>
+    <bean id="EduMatterService" 				class="com.init.resume.main.service.EduMatterService"/>
+    <bean id="InstituteService" 				class="com.init.resume.main.service.InstituteService"/>
+    <bean id="UserInfoService" 					class="com.init.resume.main.service.UserInfoService"/>
+    <bean id="OccupationService" 				class="com.init.resume.main.service.OccupationService"/>
+    <bean id="PdfService" 						class="com.init.resume.main.service.PdfService"/>
+    <bean id="PrizeService" 					class="com.init.resume.main.service.PrizeService"/>
+    <bean id="QualificationCodeService" 		class="com.init.resume.main.service.QualificationCodeService"/>
+    <bean id="QualificationService" 			class="com.init.resume.main.service.QualificationService"/>
+    <bean id="SpotService" 						class="com.init.resume.main.service.SpotService"/>
+    <bean id="TaskService" 						class="com.init.resume.main.service.TaskService"/>
+    <bean id="WorkService" 						class="com.init.resume.main.service.WorkService"/>
+    <bean id="UserService" 						class="com.init.resume.main.service.UserService"/>
+
+	<bean id="bcryptPasswordEncoder" 			class="org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder" />
+	 <bean id="spring.RegularCommonsMultipartResolver"
+
+  class="org.springframework.web.multipart.commons.CommonsMultipartResolver">
+
+    <property name="maxUploadSize" value="100000000" />
+
+    <property name="maxInMemorySize" value="100000000" />
+
+ </bean>
+	<alias name="spring.RegularCommonsMultipartResolver" alias="multipartResolver" />
+	<mybatis:scan base-package="com.init.resume.main.mapper"/>
+</beans>

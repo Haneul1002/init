@@ -1,0 +1,55 @@
+
+<?xml-model href="file.dtd" type="application/xml-dtd"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.init.resume.main.mapper.QualificationCodeMapper">
+
+    <resultMap id="QualificationCodeResult"  type="QualificationCode">
+
+        <result property="qualifi_mc"   column="qualifi_mc"/>
+        <result property="qualifi_name" column="qualifi_name"/>
+        <result property="issuer"       column="issuer"/>
+        <result property="rnum"         column="rnum"/>
+        <result property="totcnt"       column="totcnt"/>
+        <result property="qualifi_nm"   column="qualifi_nm"/>
+    </resultMap>
+    
+    <select id="getAllQualification_code"  parameterType="hashMap"   resultType="QualificationCode"  >
+    <![CDATA[
+        SELECT * 
+        FROM ( 
+            SELECT A.*, (ROW_NUMBER() OVER()) AS RNUM, COUNT(*) OVER() AS totcnt
+            FROM( 
+                select *
+                from resume.resume_qualification_code 
+            )A)A
+        WHERE RNUM BETWEEN #{start} AND #{limit} ORDER BY RNUM ASC
+    ]]>
+    </select>
+
+    <insert id="saveQualification_code" parameterType="hashMap">
+    <![CDATA[
+        INSERT INTO resume.resume_qualification_code
+        (qualifi_name,issuer)
+        VALUES(#{qualifi_name},#{issuer});
+    ]]>
+    </insert>
+
+    <delete id="deleteQualification_code" parameterType="hashMap">
+        <![CDATA[
+            DELETE 
+            FROM resume.resume_qualification_code 
+            where qualifi_nm = ${qualifi_nm}
+        ]]>
+    </delete>
+
+    <update id="updateQualification_code" parameterType="hashMap">
+        <![CDATA[
+            UPDATE resume.resume_qualification_code 
+            SET qualifi_name = #{qualifi_name},
+            issuer = #{issuer}
+            WHERE qualifi_nm = ${qualifi_nm}
+        ]]>
+    </update>
+</mapper>

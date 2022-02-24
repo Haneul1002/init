@@ -1,0 +1,62 @@
+.container {
+    max-width: 100%;
+    margin: 0;
+    padding: 54px;
+}
+
+.tab_title {
+    width: 100%;
+    height: 46px;
+}
+
+.tab_title .box {
+    float: left;
+    width: 14.2857142857%;
+    padding: 10px 15px;
+    cursor: pointer;
+    text-align: center;
+    border: 1px solid #bebebe;
+}
+
+#disabled {
+    pointer-events: none;
+    opacity: 0.4;
+}
+
+
+.box.on {
+    background-color: #ffb715;
+    font-weight: bold;
+}
+
+.tab_cont {
+    clear: both;
+    border: 1px solid #dedede;
+    width: 100%;
+    height: auto;
+    background-color: #fff;
+    float: left;
+}
+
+.tab_cont .cont {
+    display: none;
+    text-align: center;
+}
+
+.on .cards {
+    display: flex;
+    flex-direction: column;
+    width: 686px;
+    margin: 0;
+    border: 1px solid rgba(0, 0, 0, .125);
+    border-radius: .25rem;
+}
+
+.tab_cont .cont.on {
+    display: flex;
+}
+
+
+#detail-select {
+    display: none;
+}

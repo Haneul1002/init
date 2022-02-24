@@ -1,0 +1,68 @@
+
+<?xml-model href="file.dtd" type="application/xml-dtd"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.init.resume.main.mapper.PrizeMapper">
+
+    <resultMap id="PrizeResult"  type="Prize">
+
+        <result property="info_id"              column="info_id"/>
+        <result property="name"                 column="name"/>
+        <result property="agency"               column="agency"/>
+        <result property="reg_date"             column="reg_date"/>
+        <result property="evidence"             column="evidence"/>
+        <result property="prize_id"             column="prize_id"/>
+        <result property="totcnt"               column="totcnt"/>
+
+    </resultMap>
+    
+    <select id="getAllPrize"  parameterType="hashMap"   resultType="Prize"  >
+    <![CDATA[
+    SELECT * 
+    FROM ( 
+        SELECT A.*, (ROW_NUMBER() OVER()) AS RNUM, COUNT(*) OVER() AS totcnt 
+        FROM ( 
+            select  p2.info_id,  p2.id, p2.name , p2.agency , p2.reg_date , p2.evidence 
+            from resume.resume_personal_info p, resume.resume_prize p2 
+            where  p.id = p2.info_id and p2.info_id = #{info_id}
+            )A)A
+        WHERE RNUM BETWEEN #{start} AND #{limit} ORDER BY reg_date DESC
+    ]]>
+    </select>
+
+    <insert id="savePrize" parameterType="hashMap">
+    <![CDATA[
+        INSERT INTO resume.resume_prize
+        (info_id, name, agency, reg_date, evidence)
+        VALUES(
+            ${info_id}, 
+            #{name}, 
+            #{agency}, 
+            TO_DATE(#{reg_date},  'YYYY-MM-DD'), 
+            #{evidence}
+        );
+    ]]>
+    </insert>
+
+    <delete id="deletePrize" parameterType="hashMap">
+    <![CDATA[
+        DELETE 
+        FROM resume.resume_prize 
+        where id = ${id}
+    ]]>
+    </delete>
+
+    <update id="updatePrize" parameterType="hashMap">
+    <![CDATA[
+        UPDATE resume.resume_prize 
+        SET 
+            info_id     = ${info_id}, 
+            name        = #{name}, 
+            Agency      = #{agency}, 
+            Reg_date    = TO_DATE(#{reg_date},  'YYYY-MM-DD'),
+            Evidence    = #{evidence}
+        WHERE id = ${id}
+    ]]>
+    </update>
+</mapper>

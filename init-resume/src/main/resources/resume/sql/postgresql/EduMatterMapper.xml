@@ -1,0 +1,72 @@
+
+<?xml-model href="file.dtd" type="application/xml-dtd"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.init.resume.main.mapper.EduMatterMapper">
+
+    <resultMap id="EduMatterResult"  type="EduMatter">
+
+        <result property="info_id"              column="info_id"/>
+        <result property="course_name"          column="course_name"/>
+        <result property="date"                 column="date"/>
+        <result property="start_date"           column="start_date"/>
+        <result property="end_date"             column="end_date"/>
+        <result property="institation"          column="institation"/>
+        <result property="completion_number"    column="completion_number"/>
+        <result property="id"                   column="id"/>
+        <result property="totcnt"               column="totcnt"/>
+
+    </resultMap>
+    
+    <select id="getAllEduMatter"  parameterType="hashMap"   resultType="Edumatter"  >
+    <![CDATA[
+    SELECT * 
+    FROM ( 
+        SELECT A.*,(ROW_NUMBER() OVER()) AS RNUM, COUNT(*) OVER() AS totcnt 
+        FROM ( 
+            select  e.info_id, e.course_name, i.name as institation, e.completion_number, concat( e.Start_date,' ~ ', e.End_date) date, e.id ,e.Start_date as order_date,e.End_date as order_date2
+            from resume.resume_personal_info p, resume.resume_educational_matter e, resume.resume_institute i
+            where  p.id = e.info_id and e.info_id = #{info_id} and i.institute_nm = e.institute_nm
+            )A)A
+        WHERE RNUM BETWEEN #{start} AND #{limit} ORDER BY order_date DESC, order_date2 DESC
+    ]]>
+    </select>
+
+    <insert id="saveEduMatter" parameterType="hashMap">
+    <![CDATA[
+        INSERT INTO resume.resume_educational_matter
+        (info_id, course_name, completion_number, start_date, end_date, institute_nm)
+        VALUES(
+            ${info_id}, 
+            #{course_name}, 
+            #{completion_number},
+            TO_DATE(#{start_date},  'YYYY-MM-DD'),
+            TO_DATE(#{end_date},  'YYYY-MM-DD'),
+            ${institute_nm}
+        );
+    ]]>
+    </insert>
+
+    <delete id="deleteEduMatter" parameterType="hashMap">
+    <![CDATA[
+        DELETE 
+        FROM resume.resume_educational_matter 
+        where id = ${id}
+    ]]>
+    </delete>
+
+    <update id="updateEduMatter" parameterType="hashMap">
+    <![CDATA[
+        UPDATE resume.resume_educational_matter 
+        SET 
+            info_id             = ${info_id}, 
+            course_name         = #{course_name}, 
+            completion_number   = #{completion_number},
+            start_date          = TO_DATE(#{start_date},  'YYYY-MM-DD'),
+            end_date            = TO_DATE(#{end_date},  'YYYY-MM-DD'),
+            institute_nm        = ${institute_nm}
+        WHERE id = ${id}
+    ]]>
+    </update>
+</mapper>

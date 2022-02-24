@@ -1,0 +1,52 @@
+
+<?xml-model href="file.dtd" type="application/xml-dtd"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.init.resume.main.mapper.AreaMapper">
+
+    <resultMap id="AreaResult"  type="Area">
+
+        <result property="id"           column="id"/>
+        <result property="name"         column="name"/>
+        <result property="rnum"         column="rnum"/>
+        <result property="totcnt"       column="totcnt"/>
+    </resultMap>
+    
+    <select id="getAllArea"  parameterType="hashMap"   resultType="Area"  >
+    <![CDATA[
+        SELECT * 
+        FROM ( 
+            SELECT A.*, (ROW_NUMBER() OVER()) AS RNUM, COUNT(*) OVER() AS totcnt
+            FROM( 
+                select * 
+                from resume.resume_area 
+            )A)A
+        WHERE RNUM BETWEEN #{start} AND #{limit} ORDER BY id ASC
+    ]]>
+    </select>
+
+    <insert id="saveArea" parameterType="hashMap">
+    <![CDATA[
+        INSERT INTO resume.resume_area
+        (name)  
+        VALUES(#{name});
+    ]]>
+    </insert>
+
+    <delete id="deleteArea" parameterType="hashMap">
+        <![CDATA[
+            DELETE 
+            FROM resume.resume_area 
+            where id = ${id}
+        ]]>
+    </delete>
+
+    <update id="updateArea" parameterType="hashMap">
+        <![CDATA[
+            UPDATE resume.resume_area 
+            SET name = #{name}
+            WHERE id = ${id}
+        ]]>
+    </update>
+</mapper>

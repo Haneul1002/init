@@ -1,0 +1,52 @@
+
+<?xml-model href="file.dtd" type="application/xml-dtd"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.init.resume.main.mapper.ClientMapper">
+
+    <resultMap id="ClientResult"  type="Client">
+
+        <result property="client_nm"    column="client_nm"/>
+        <result property="name"         column="name"/>
+        <result property="rnum"         column="rnum"/>
+        <result property="totcnt"       column="totcnt"/>
+    </resultMap>
+    
+    <select id="getAllClient"  parameterType="hashMap"   resultType="Client"  >
+    <![CDATA[
+        SELECT * 
+        FROM ( 
+          SELECT A.*, (ROW_NUMBER() OVER()) AS RNUM, COUNT(*) OVER() AS totcnt
+          FROM( 
+            select client_nm, name 
+            from resume.resume_client 
+            )A)A
+        WHERE RNUM BETWEEN #{start} AND #{limit} ORDER BY RNUM ASC
+    ]]>
+    </select>
+
+    <insert id="saveClient" parameterType="hashMap">
+    <![CDATA[
+        INSERT INTO resume.resume_client
+        (name)
+        VALUES(#{name});
+    ]]>
+    </insert>
+
+    <delete id="deleteClient" parameterType="hashMap">
+      <![CDATA[
+        DELETE 
+        FROM resume.resume_client 
+        where client_nm = ${client_nm}
+      ]]>
+    </delete>
+
+    <update id="updateClient" parameterType="hashMap">
+      <![CDATA[
+        UPDATE resume.resume_client 
+        SET name = #{name}
+        WHERE client_nm = ${client_nm}
+      ]]>
+    </update>
+</mapper>

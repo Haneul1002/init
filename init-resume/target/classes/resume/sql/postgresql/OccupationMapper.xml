@@ -1,0 +1,52 @@
+
+<?xml-model href="file.dtd" type="application/xml-dtd"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.init.resume.main.mapper.OccupationMapper">
+
+    <resultMap id="OccupationResult"  type="Occupation">
+
+        <result property="occupation_nm"    column="occupation_nm"/>
+        <result property="name"             column="name"/>
+        <result property="rnum"             column="rnum"/>
+        <result property="totcnt"           column="totcnt"/>
+    </resultMap>
+    
+    <select id="getAllOccupation"  parameterType="hashMap"   resultType="Occupation"  >
+        <![CDATA[
+        SELECT * 
+        FROM ( 
+            SELECT A.*, (ROW_NUMBER() OVER()) AS RNUM, COUNT(*) OVER() AS totcnt 
+            FROM ( 
+                select * 
+                from resume.resume_occupation 
+                )A)A
+        WHERE RNUM BETWEEN #{start} AND #{limit} ORDER BY occupation_nm ASC
+        ]]>
+    </select>
+
+    <insert id="saveOccupation" parameterType="hashMap">
+        <![CDATA[
+            INSERT INTO resume.resume_occupation
+            (name)
+            VALUES(#{name});
+        ]]>
+    </insert>
+
+    <delete id="deleteOccupation" parameterType="hashMap">
+        <![CDATA[
+            DELETE 
+            FROM resume.resume_occupation 
+            where occupation_nm = ${occupation_nm}
+        ]]>
+    </delete>
+
+    <update id="updateOccupation" parameterType="hashMap">
+        <![CDATA[
+            UPDATE resume.resume_occupation 
+            SET name = #{name}
+            WHERE occupation_nm = ${occupation_nm}
+        ]]>
+    </update>
+</mapper>

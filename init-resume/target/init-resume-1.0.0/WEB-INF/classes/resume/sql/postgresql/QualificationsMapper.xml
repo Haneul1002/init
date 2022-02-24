@@ -1,0 +1,67 @@
+
+<?xml-model href="file.dtd" type="application/xml-dtd"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.init.resume.main.mapper.QualificationsMapper">
+
+    <resultMap id="QualificationsResult"  type="Qualification">
+
+        <result property="info_id"              column="info_id"/>
+        <result property="name"                 column="Name"/>
+        <result property="reg_num"              column="Reg_num"/>
+        <result property="reg_date"             column="Reg_date"/>
+        <result property="issuer"               column="Issuer"/>
+        <result property="qualifi_id"           column="Qualifi_ID"/>
+        <result property="totcnt"               column="totcnt"/>
+        <result property="qualifi_nm"   								column="qualifi_nm"/>
+
+    </resultMap>
+    
+    <select id="getAllQualifications"  parameterType="hashMap"   resultType="Qualification"  >
+    <![CDATA[
+    SELECT * 
+    FROM ( 
+        SELECT A.*, (ROW_NUMBER() OVER()) AS RNUM, COUNT(*) OVER() AS totcnt 
+        FROM ( 
+            SELECT q.id, q.info_id, qc.qualifi_name as name, qc.issuer, q.reg_num , q.reg_date 
+            FROM resume.resume_qualifications q, resume.resume_qualification_code qc
+            WHERE q.info_id = #{info_id} and qc.qualifi_nm = q.qualifi_nm
+            )A)A
+        WHERE RNUM BETWEEN #{start} AND #{limit} ORDER BY reg_date DESC
+    ]]>
+    </select>
+
+    <insert id="saveQualifications" parameterType="hashMap">
+    <![CDATA[
+        INSERT INTO resume.resume_qualifications
+        (info_id, qualifi_nm, reg_num, reg_date)
+        VALUES(
+            ${info_id}, 
+            ${qualifi_nm}, 
+            #{reg_num}, 
+            TO_DATE(#{reg_date},  'YYYY-MM-DD')
+        );
+    ]]>
+    </insert>
+
+    <delete id="deleteQualifications" parameterType="hashMap">
+    <![CDATA[
+        DELETE 
+        FROM resume.resume_qualifications 
+        WHERE id = ${id}
+    ]]>
+    </delete>
+
+    <update id="updateQualifications" parameterType="hashMap">
+    <![CDATA[
+        UPDATE resume.resume_qualifications 
+        SET 
+            info_id     = ${info_id}, 
+            qualifi_nm  = ${qualifi_nm}, 
+            reg_num     = #{reg_num}, 
+            reg_date    = TO_DATE(#{reg_date},  'YYYY-MM-DD')
+        WHERE id = ${id}
+    ]]>
+    </update>
+</mapper>

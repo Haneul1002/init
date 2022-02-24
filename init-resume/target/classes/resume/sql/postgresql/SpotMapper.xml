@@ -1,0 +1,52 @@
+
+<?xml-model href="file.dtd" type="application/xml-dtd"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.init.resume.main.mapper.SpotMapper">
+
+    <resultMap id="SpotResult"  type="Spot">
+
+        <result property="spot_nm"      column="spot_nm"/>
+        <result property="name"         column="name"/>
+        <result property="rnum"         column="rnum"/>
+        <result property="totcnt"       column="totcnt"/>
+    </resultMap>
+    
+    <select id="getAllSpot"  parameterType="hashMap"   resultType="Spot"  >
+    <![CDATA[
+        SELECT * 
+        FROM ( 
+          SELECT A.*, (ROW_NUMBER() OVER()) AS RNUM, COUNT(*) OVER() AS totcnt
+          FROM( 
+            select spot_nm, name 
+            from resume.resume_spot 
+            )A)A
+        WHERE RNUM BETWEEN #{start} AND #{limit} ORDER BY RNUM ASC
+    ]]>
+    </select>
+
+    <insert id="saveSpot" parameterType="hashMap">
+    <![CDATA[
+        INSERT INTO resume.resume_spot
+        (name)
+        VALUES(#{name});
+    ]]>
+    </insert>
+
+    <delete id="deleteSpot" parameterType="hashMap">
+      <![CDATA[
+        DELETE 
+        FROM resume.resume_spot 
+        where spot_nm = ${spot_nm}
+      ]]>
+    </delete>
+
+    <update id="updateSpot" parameterType="hashMap">
+      <![CDATA[
+        UPDATE resume.resume_spot 
+        SET name = #{name}
+        WHERE spot_nm = ${spot_nm}
+      ]]>
+    </update>
+</mapper>

@@ -1,0 +1,99 @@
+
+<?xml-model href="file.dtd" type="application/xml-dtd"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.init.resume.main.mapper.CareerMapper">
+
+    <resultMap id="CareerResult"  type="Career">
+
+        <result property="info_id"              column="info_id"/>
+        <result property="project_name"         column="Project_name"/>
+        <result property="date"                 column="Date"/>
+        <result property="start_date"           column="Start_date"/>
+        <result property="end_date"             column="End_date"/>
+        <result property="client_name"           column="ClientName"/>
+        <result property="task_occupation"       column="Taskoccupation"/>
+        <result property="task"                 column="Task"/>
+        <result property="occupation"           column="Occupation"/>
+        <result property="career_id"            column="Career_id"/>
+        <result property="rnum"                 column="rnum"/>
+        <result property="totcnt"               column="totcnt"/>
+
+    </resultMap> 
+    
+    <select id="getAllCareer"  parameterType="hashMap"   resultType="Career">
+<![CDATA[
+    SELECT * 
+      FROM ( 
+        SELECT A.*, (ROW_NUMBER() OVER()) AS RNUM, COUNT(*) OVER() AS totcnt 
+          FROM ( 
+            select cd.info_id
+            	  ,cd.project_name
+            	  ,concat( cd.start_date,' ~ ', cd.end_date) date
+            	  ,c.name as client_name
+            	  ,concat(ro.name,'/',t.name) as task_occupation
+            	  ,ro.name as occupation
+            	  ,t.name as task
+            	  ,cd.id
+            	  ,cd.start_date as order_date
+            	  ,cd.end_date as order_date2
+              from resume.resume_Career_detail cd
+              ,resume.resume_client c
+              ,resume.resume_personal_info p
+              ,resume.resume_task t
+              ,resume.resume_occupation ro
+             where 1 = 1
+               and p.id = cd.info_id
+               and p.id = #{info_id}
+               and cd.client_nm = c.client_nm
+               and t.task_nm = cd.task
+               and ro.occupation_nm = cd.occupation
+               )A
+            )A
+	 WHERE 1 = 1
+	   AND RNUM BETWEEN #{start} AND #{limit} 
+	   ORDER BY order_date DESC
+	           ,order_date2 DESC
+]]>
+    </select>
+
+    <insert id="saveCareer" parameterType="hashMap">
+      <![CDATA[
+      INSERT INTO resume.resume_career_detail
+      (info_id, project_name, start_date, end_date, client_nm, task, occupation)
+      VALUES(
+        #{info_id}
+        ,#{project_name}
+        ,TO_DATE(#{start_date},  'YYYY-MM-DD')
+        ,TO_DATE(#{end_date},  'YYYY-MM-DD')
+        ,${client_nm}
+        ,${task}
+        ,${occupation}
+        );
+      ]]>
+    </insert>
+
+    <delete id="deleteCareer" parameterType="hashMap">
+      <![CDATA[
+        DELETE 
+        FROM resume.resume_career_detail 
+        WHERE id = ${id}
+      ]]>
+    </delete>
+
+    <update id="updateCareer" parameterType="hashMap">
+      <![CDATA[
+        UPDATE resume.resume_career_detail 
+        SET 
+            info_id = #{info_id}
+            ,project_name = #{project_name}
+            ,start_date = TO_DATE(#{start_date},  'YYYY-MM-DD')
+            ,end_date = TO_DATE(#{end_date},  'YYYY-MM-DD')
+            ,client_nm = ${client_nm} 
+            ,task = ${task}
+            ,occupation = ${occupation} 
+        WHERE id = ${id}
+      ]]>
+    </update>
+</mapper>

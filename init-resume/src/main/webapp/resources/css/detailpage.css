@@ -1,0 +1,56 @@
+.container {
+    max-width: 100%;
+    margin: 0;
+    padding-right: 0;
+    padding-left: 0;
+}
+
+.detailTable{
+    width: 100%;
+    
+}
+
+.detailTable td{
+    padding: 10px;
+    text-align: center;
+}
+
+.detailTable td.areaCheckBox{
+    padding: 10px;
+    text-align: left;
+}
+
+.detailTable .td-file{
+    text-align:  right;
+    
+}
+
+.addTable{
+    width: 100%;
+}
+
+.addTable td{
+    text-align: center;
+    padding: 10px;
+}
+
+.ui-jqgrid.ui-widget.ui-widget-content.ui-corner-all {width:100% !important;}
+
+.ui-jqgrid-view {width:100% !important;}
+
+.ui-jqgrid-hdiv {width:100% !important;}
+
+.ui-jqgrid .ui-jqgrid-hbox {width:100% !important; padding:0 !important;}
+
+.ui-jqgrid-htable {width:100% !important;}
+
+.ui-jqgrid-bdiv {width:100% !important;}
+
+.ui-jqgrid-btable {width:100% !important;}
+
+.ui-jqgrid-pager {width:100% !important;}
+
+.detail-info-img{
+    width: 94.4px;
+    height: 113.3px;
+}

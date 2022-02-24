@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:security="http://www.springframework.org/schema/security"
+	xsi:schemaLocation="http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security.xsd
+		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+	
+	
+	<bean id="bcryptPasswordEncoder" class="org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder" />
+
+	<security:http use-expressions="true">
+		<security:intercept-url pattern="/" access="permitAll"/>
+		<security:intercept-url pattern="/resources/**" access="permitAll"/>
+		<security:intercept-url pattern="/detail" access="hasRole('ROLE_MEMBER')"/>
+		<security:intercept-url pattern="/main" access="hasRole('ROLE_ADMIN')"/>
+		<security:intercept-url pattern="/setting" access="hasRole('ROLE_ADMIN')"/>
+		<security:form-login login-page="/users/login"
+							 username-parameter="id"
+							 login-processing-url="/users/login-processing"
+							 default-target-url="/" />
+		<security:logout logout-url="/users/logout"
+						 logout-success-url="/"
+						 invalidate-session="true"/>
+		
+		
+		<!-- 최대 한 개의 세션만 생성되도록 -->
+		<security:session-management invalid-session-url="/users/login">
+            <security:concurrency-control max-sessions="1"
+            							  expired-url="/users/login"
+            							  error-if-maximum-exceeded="true" />
+        </security:session-management>
+	</security:http>
+	
+	<security:authentication-manager>	
+	  <security:authentication-provider user-service-ref="UserService">
+	  	<security:password-encoder hash="bcrypt"/>
+	  </security:authentication-provider>
+	</security:authentication-manager>
+	
+	
+	<!-- <security:authentication-manager>	
+		<security:authentication-provider>			
+			
+			<security:user-service>		
+				<security:user name="aaa" password="{noop}aaa" authorities="ROLE_MEMBER"/>
+				<security:user name="admin" password="{noop}admin" authorities="ROLE_MEMBER, ROLE_ADMIN"/> 
+			</security:user-service>
+		
+			<security:password-encoder hash="bcrypt"/>
+			<security:jdbc-user-service data-source-ref="dataSource"
+				users-by-username-query="SELECT ID, PASSWORD, ENABLED FROM RESUME.RESUME_USERS WHERE ID=?"
+				authorities-by-username-query="SELECT ID, PASSWORD, auth as authority FROM RESUME.RESUME_USERS WHERE ID=?"
+			/>			
+		</security:authentication-provider>
+	</security:authentication-manager> -->
+
+</beans>

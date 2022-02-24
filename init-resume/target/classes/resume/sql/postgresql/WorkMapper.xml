@@ -1,0 +1,99 @@
+
+<?xml-model href="file.dtd" type="application/xml-dtd"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.init.resume.main.mapper.WorkMapper">
+
+    <resultMap id="WorkResult"  type="Work">
+
+        <result property="info_id"              column="info_id"/>
+        <result property="date"                 column="date"/>
+        <result property="start_date"           column="start_date"/>
+        <result property="end_date"             column="end_date"/>
+        <result property="company_name"         column="company_name"/>
+        <result property="department"           column="department"/>
+        <result property="occupation"           column="occupation"/>
+        <result property="task"                 column="task"/>
+        <result property="spot"                 column="spot"/>
+        <result property="spot_mc"              column="spot_mc"/>
+        <result property="id"                   column="id"/>
+        <result property="totcnt"               column="totcnt"/>
+
+    </resultMap>
+    
+    <select id="getAllWork"  parameterType="hashMap"   resultType="Work">
+    <![CDATA[
+    SELECT * 
+      FROM (
+        SELECT A.*, (ROW_NUMBER() OVER()) AS RNUM, COUNT(*) OVER() AS totcnt 
+          FROM ( 
+               select w.info_id
+               		 ,w.company_name
+               		 ,w.department
+               		 ,concat(o.name, '/', t.name) as task_occupation
+               		 ,o.name as occupation
+               		 ,t.name as task
+               		 ,concat( w.start_date,' ~ ', w.end_date) date
+               		 ,w.id
+               		 ,s.name as spot
+               		 ,w.start_date as order_date
+               		 ,w.end_date as order_date2
+                 from resume.resume_personal_info p
+                 	 ,resume.resume_work_expertentce w
+                 	 ,resume.resume_task t
+                 	 ,resume.resume_spot s
+                 	 ,resume.resume_occupation o
+                where 1=1
+                  and p.id = w.info_id 
+                  and p.id = #{info_id} 
+                  and w.task = t.task_nm 
+                  and w.occupation = o.occupation_nm
+                  and w.spot_nm = s.spot_nm
+               )A
+            )A
+     WHERE RNUM BETWEEN #{start} AND #{limit} ORDER BY order_date DESC ,order_date2 DESC 
+    ]]>
+    </select>
+
+    <insert id="saveWork" parameterType="hashMap">
+      <![CDATA[
+      INSERT INTO resume.resume_work_expertentce
+      (info_id, company_name, start_date, end_date, department, spot_nm, task, occupation)
+      VALUES(
+        ${info_id}
+        ,#{company_name}
+        ,TO_DATE(#{start_date},  'YYYY-MM-DD')
+        ,TO_DATE(#{end_date},  'YYYY-MM-DD')
+        ,#{department}
+        ,${spot_nm}
+        ,${task}
+        ,${occupation}
+        );
+      ]]>
+    </insert>
+
+    <delete id="deleteWork" parameterType="hashMap">
+      <![CDATA[
+        DELETE 
+          FROM resume.resume_work_expertentce 
+         where id = ${id}
+      ]]>
+    </delete>
+
+    <update id="updateWork" parameterType="hashMap">
+      <![CDATA[
+        UPDATE resume.resume_work_expertentce 
+           SET 
+              info_id        = ${info_id}
+              ,company_name  = #{company_name}
+              ,start_date    = TO_DATE(#{start_date},  'YYYY-MM-DD')
+              ,end_date      = TO_DATE(#{end_date},  'YYYY-MM-DD')
+              ,department    = #{department}
+              ,spot_nm       = ${spot_nm}
+              ,task          = ${task}
+              ,occupation    = ${occupation} 
+        WHERE id = ${id}
+      ]]>
+    </update>
+</mapper>

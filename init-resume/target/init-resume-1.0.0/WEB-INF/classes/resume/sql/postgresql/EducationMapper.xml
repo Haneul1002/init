@@ -1,0 +1,71 @@
+
+<?xml-model href="file.dtd" type="application/xml-dtd"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.init.resume.main.mapper.EducationMapper">
+
+    <resultMap id="EducationResult"  type="Education">
+
+        <result property="info_id"              column="info_id"/>
+        <result property="department"           column="department"/>
+        <result property="name"                 column="name"/>
+        <result property="date"                 column="date"/>
+        <result property="start_date"           column="start_date"/>
+        <result property="end_date"             column="end_date"/>
+        <result property="degree"               column="degree"/>
+        <result property="id"                   column="id"/>
+        <result property="totcnt"               column="totcnt"/>
+
+    </resultMap>
+    
+    <select id="getAllEducation"  parameterType="hashMap"   resultType="Education"  >
+    <![CDATA[
+    SELECT * 
+    FROM ( 
+        SELECT A.*, (ROW_NUMBER() OVER()) AS RNUM, COUNT(*) OVER() AS totcnt 
+        FROM ( 
+            select  e.info_id , e.name , e.department , e.degree, concat( e.Start_date,' ~ ', e.End_date) date, e.id ,e.Start_date as order_date, e.End_date as order_date2
+            from resume.resume_personal_info p, resume.resume_education e 
+            where  p.id = e.info_id and e.info_id = #{info_id}
+            )A)A
+        WHERE RNUM BETWEEN #{start} AND #{limit} ORDER BY order_date DESC, order_date2 DESC
+    ]]>
+    </select>
+
+    <insert id="saveEducation" parameterType="hashMap">
+    <![CDATA[
+        INSERT INTO resume.resume_education
+        (info_id, Name, start_date, end_date, department, degree)
+        VALUES(
+            ${info_id}, 
+            #{name}, 
+            TO_DATE(#{start_date},  'YYYY-MM-DD'), 
+            TO_DATE(#{end_date},  'YYYY-MM-DD'),
+            #{department}, 
+            #{degree}
+        );
+    ]]>
+    </insert>
+
+    <delete id="deleteEducation" parameterType="hashMap">
+    <![CDATA[
+        DELETE 
+        FROM resume.resume_education 
+        WHERE id = ${id}
+    ]]>
+    </delete>
+
+    <update id="updateEducation" parameterType="hashMap">
+    <![CDATA[
+        UPDATE resume.resume_education 
+        SET 
+            info_id         = ${info_id}, 
+            name            = #{name}, 
+            start_date      = TO_DATE(#{start_date},  'YYYY-MM-DD'),
+            end_date        = TO_DATE(#{end_date},  'YYYY-MM-DD'),
+            department      = #{department}, 
+            degree          = #{degree}
+        WHERE id = ${id}
+    ]]>
+    </update>
+</mapper>
